@@ -1,13 +1,12 @@
 ﻿namespace Backend_Mobile_App.DTOs
 {
-    public class UserDto
+    public class UserDTO
     {
-        public string UserId { get; set; } = null!; 
-        public string UserName { get; set; } = null!; 
-        public string? Email { get; set; } 
-        public string? PhoneNumber { get; set; } 
-        
-        public decimal? Latitude { get; set; }
-        public decimal? Longitude { get; set; }
+        public string UserId { get; set; } = null!;
+        public string UserName { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string? PhoneNumber { get; set; } = null!;
+        public string Role { get; set; } = null!;
+        public string Token { get; set; } 
     }
 }

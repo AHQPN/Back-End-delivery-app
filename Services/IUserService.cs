@@ -6,10 +6,10 @@ namespace Backend_Mobile_App.Services
 {
     public interface IUserService
     {
-        Task<IEnumerable<UserDto>> GetAllAsync();
-        Task<UserDto?> GetByIdAsync(string id);
-        Task AddAsync(UserDto userDto);
-        Task UpdateAsync(UserDto userDto);
+        Task<IEnumerable<UserDTO>> GetAllAsync();
+        Task<UserDTO?> GetByIdAsync(string id);
+        Task AddAsync(UserDTO UserDTO);
+        Task UpdateAsync(UserDTO UserDTO);
         Task DeleteAsync(string id);
     }
 }
