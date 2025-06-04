@@ -9,7 +9,6 @@ namespace Backend_Mobile_App.Models
         public string OrderId { get; set; } = null!;
         public string PaymentMethod { get; set; } = null!;
         public string PaymentStatus { get; set; } = null!;
-        public string? TransactionId { get; set; }
         public decimal Amount { get; set; }
         public DateTime? CreatedAt { get; set; }
 

@@ -7,11 +7,11 @@ namespace Backend_Mobile_App.Models
     {
         public string OrderItemId { get; set; } = null!;
         public string? OrderId { get; set; }
-        public string? ProductId { get; set; }
-        public int Quantity { get; set; }
-        public decimal Price { get; set; }
+        public string? SizeId { get; set; }
+        public string? CategoryId { get; set; }
 
+        public virtual Category? Category { get; set; }
         public virtual Order? Order { get; set; }
-        public virtual Product? Product { get; set; }
+        public virtual Size? Size { get; set; }
     }
 }

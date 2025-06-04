@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Backend_Mobile_App.Models;
-using Backend_Mobile_App.Data; // Import namespace của DbContext của bạn
+using Backend_Mobile_App.Data;
 
 namespace Backend_Mobile_App.Controllers
 {
@@ -9,9 +9,9 @@ namespace Backend_Mobile_App.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly TrackingShipmentContext _context; // Sử dụng TrackingShipmentContext của bạn
+        private readonly Tracking_ShipmentContext _context; // Sử dụng Tracking_ShipmentContext của bạn
 
-        public UsersController(TrackingShipmentContext context) // Inject TrackingShipmentContext
+        public UsersController(Tracking_ShipmentContext context) // Inject Tracking_ShipmentContext
         {
             _context = context;
         }
@@ -51,7 +51,7 @@ namespace Backend_Mobile_App.Controllers
         {
             if (_context.Users == null)
             {
-                return Problem("Entity set 'TrackingShipmentContext.Users' is null.");
+                return Problem("Entity set 'Tracking_ShipmentContext.Users' is null.");
             }
             _context.Users.Add(user);
             await _context.SaveChangesAsync();

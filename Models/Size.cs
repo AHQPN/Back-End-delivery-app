@@ -7,12 +7,13 @@ namespace Backend_Mobile_App.Models
     {
         public Size()
         {
-            Products = new HashSet<Product>();
+            OrderItems = new HashSet<OrderItem>();
         }
 
         public string SizeId { get; set; } = null!;
         public string? Description { get; set; }
+        public double? Weight { get; set; }
 
-        public virtual ICollection<Product> Products { get; set; }
+        public virtual ICollection<OrderItem> OrderItems { get; set; }
     }
 }

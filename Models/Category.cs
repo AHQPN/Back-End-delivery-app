@@ -7,12 +7,12 @@ namespace Backend_Mobile_App.Models
     {
         public Category()
         {
-            Products = new HashSet<Product>();
+            OrderItems = new HashSet<OrderItem>();
         }
 
         public string CategoryId { get; set; } = null!;
         public string CategoryName { get; set; } = null!;
 
-        public virtual ICollection<Product> Products { get; set; }
+        public virtual ICollection<OrderItem> OrderItems { get; set; }
     }
 }

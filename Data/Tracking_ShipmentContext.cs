@@ -6,13 +6,13 @@ using Backend_Mobile_App.Models;
 
 namespace Backend_Mobile_App.Data
 {
-    public partial class TrackingShipmentContext : DbContext
+    public partial class Tracking_ShipmentContext : DbContext
     {
-        public TrackingShipmentContext()
+        public Tracking_ShipmentContext()
         {
         }
 
-        public TrackingShipmentContext(DbContextOptions<TrackingShipmentContext> options)
+        public Tracking_ShipmentContext(DbContextOptions<Tracking_ShipmentContext> options)
             : base(options)
         {
         }
@@ -20,24 +20,16 @@ namespace Backend_Mobile_App.Data
         public virtual DbSet<Assignment> Assignments { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
         public virtual DbSet<ChatMessage> ChatMessages { get; set; } = null!;
-        public virtual DbSet<Delivery> Deliveries { get; set; } = null!;
+        public virtual DbSet<Location> Locations { get; set; } = null!;
         public virtual DbSet<Notification> Notifications { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
         public virtual DbSet<OrderItem> OrderItems { get; set; } = null!;
         public virtual DbSet<Payment> Payments { get; set; } = null!;
-        public virtual DbSet<Product> Products { get; set; } = null!;
+        public virtual DbSet<Service> Services { get; set; } = null!;
         public virtual DbSet<Size> Sizes { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<Vehicle> Vehicles { get; set; } = null!;
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=localhost;Database=Tracking_Shipment;User Id=sa;Password=123456;");
-            }
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,10 +37,10 @@ namespace Backend_Mobile_App.Data
             {
                 entity.ToTable("Assignment");
 
-                entity.HasIndex(e => e.VehicleId, "UQ__Assignme__476B54B3C6139CEE")
+                entity.HasIndex(e => e.VehicleId, "UQ__Assignme__476B54B366E5BCB3")
                     .IsUnique();
 
-                entity.HasIndex(e => e.DeliveryPersonId, "UQ__Assignme__554C7AE751C57622")
+                entity.HasIndex(e => e.DeliveryPersonId, "UQ__Assignme__554C7AE7941B07E1")
                     .IsUnique();
 
                 entity.Property(e => e.AssignmentId)
@@ -90,7 +82,7 @@ namespace Backend_Mobile_App.Data
             {
                 entity.ToTable("Category");
 
-                entity.HasIndex(e => e.CategoryName, "UQ__Category__8517B2E0598D09D5")
+                entity.HasIndex(e => e.CategoryName, "UQ__Category__8517B2E04AB7CBBB")
                     .IsUnique();
 
                 entity.Property(e => e.CategoryId)
@@ -107,7 +99,7 @@ namespace Backend_Mobile_App.Data
             modelBuilder.Entity<ChatMessage>(entity =>
             {
                 entity.HasKey(e => e.MessageId)
-                    .HasName("PK__ChatMess__C87C037C0119C1F8");
+                    .HasName("PK__ChatMess__C87C037C75EC1BC1");
 
                 entity.ToTable("ChatMessage");
 
@@ -147,49 +139,15 @@ namespace Backend_Mobile_App.Data
                     .HasConstraintName("FK__ChatMessa__Sende__6754599E");
             });
 
-            modelBuilder.Entity<Delivery>(entity =>
+            modelBuilder.Entity<Location>(entity =>
             {
-                entity.ToTable("Delivery");
+                entity.ToTable("Location");
 
-                entity.Property(e => e.DeliveryId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("DeliveryID")
-                    .IsFixedLength();
+                entity.Property(e => e.LocationId).HasColumnName("LocationID");
 
-                entity.Property(e => e.ActualDeliveryTime).HasColumnType("datetime");
+                entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
 
-                entity.Property(e => e.CreatedAt)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.DeliveryPersonId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("DeliveryPersonID")
-                    .IsFixedLength();
-
-                entity.Property(e => e.DeliveryStatus).HasMaxLength(50);
-
-                entity.Property(e => e.EstimatedDeliveryTime).HasColumnType("datetime");
-
-                entity.Property(e => e.OrderId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("OrderID")
-                    .IsFixedLength();
-
-                entity.HasOne(d => d.DeliveryPerson)
-                    .WithMany(p => p.Deliveries)
-                    .HasForeignKey(d => d.DeliveryPersonId)
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("FK__Delivery__Delive__5812160E");
-
-                entity.HasOne(d => d.Order)
-                    .WithMany(p => p.Deliveries)
-                    .HasForeignKey(d => d.OrderId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Delivery__OrderI__571DF1D5");
+                entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
             });
 
             modelBuilder.Entity<Notification>(entity =>
@@ -224,11 +182,19 @@ namespace Backend_Mobile_App.Data
 
             modelBuilder.Entity<Order>(entity =>
             {
+                entity.HasIndex(e => e.SourceLocation, "UQ__Orders__244780DBB9568C60")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.DestinationLocation, "UQ__Orders__3FAFAC8AA95D02AB")
+                    .IsUnique();
+
                 entity.Property(e => e.OrderId)
                     .HasMaxLength(10)
                     .IsUnicode(false)
                     .HasColumnName("OrderID")
                     .IsFixedLength();
+
+                entity.Property(e => e.ActualDeliveryTime).HasColumnType("datetime");
 
                 entity.Property(e => e.CreatedAt)
                     .HasColumnType("datetime")
@@ -240,7 +206,20 @@ namespace Backend_Mobile_App.Data
                     .HasColumnName("CustomerID")
                     .IsFixedLength();
 
+                entity.Property(e => e.DeliveryPersonId)
+                    .HasMaxLength(10)
+                    .IsUnicode(false)
+                    .HasColumnName("DeliveryPersonID")
+                    .IsFixedLength();
+
+                entity.Property(e => e.EstimatedDeliveryTime).HasColumnType("datetime");
+
                 entity.Property(e => e.OrderStatus).HasMaxLength(20);
+
+                entity.Property(e => e.Serviceid)
+                    .HasMaxLength(10)
+                    .IsUnicode(false)
+                    .IsFixedLength();
 
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(10, 2)");
 
@@ -248,6 +227,21 @@ namespace Backend_Mobile_App.Data
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.CustomerId)
                     .HasConstraintName("FK__Orders__Customer__45F365D3");
+
+                entity.HasOne(d => d.DestinationLocationNavigation)
+                    .WithOne(p => p.OrderDestinationLocationNavigation)
+                    .HasForeignKey<Order>(d => d.DestinationLocation)
+                    .HasConstraintName("FK__Orders__Destinat__19DFD96B");
+
+                entity.HasOne(d => d.Service)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.Serviceid)
+                    .HasConstraintName("FK__Orders__Servicei__01142BA1");
+
+                entity.HasOne(d => d.SourceLocationNavigation)
+                    .WithOne(p => p.OrderSourceLocationNavigation)
+                    .HasForeignKey<Order>(d => d.SourceLocation)
+                    .HasConstraintName("FK__Orders__SourceLo__1BC821DD");
             });
 
             modelBuilder.Entity<OrderItem>(entity =>
@@ -260,19 +254,28 @@ namespace Backend_Mobile_App.Data
                     .HasColumnName("OrderItemID")
                     .IsFixedLength();
 
+                entity.Property(e => e.CategoryId)
+                    .HasMaxLength(10)
+                    .IsUnicode(false)
+                    .HasColumnName("CategoryID")
+                    .IsFixedLength();
+
                 entity.Property(e => e.OrderId)
                     .HasMaxLength(10)
                     .IsUnicode(false)
                     .HasColumnName("OrderID")
                     .IsFixedLength();
 
-                entity.Property(e => e.Price).HasColumnType("decimal(10, 2)");
-
-                entity.Property(e => e.ProductId)
-                    .HasMaxLength(10)
+                entity.Property(e => e.SizeId)
+                    .HasMaxLength(3)
                     .IsUnicode(false)
-                    .HasColumnName("ProductID")
+                    .HasColumnName("sizeId")
                     .IsFixedLength();
+
+                entity.HasOne(d => d.Category)
+                    .WithMany(p => p.OrderItems)
+                    .HasForeignKey(d => d.CategoryId)
+                    .HasConstraintName("FK__OrderItem__Categ__03F0984C");
 
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.OrderItems)
@@ -280,18 +283,17 @@ namespace Backend_Mobile_App.Data
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK__OrderItem__Order__48CFD27E");
 
-                entity.HasOne(d => d.Product)
+                entity.HasOne(d => d.Size)
                     .WithMany(p => p.OrderItems)
-                    .HasForeignKey(d => d.ProductId)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("FK__OrderItem__Produ__49C3F6B7");
+                    .HasForeignKey(d => d.SizeId)
+                    .HasConstraintName("FK__OrderItem__sizeI__02084FDA");
             });
 
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.ToTable("Payment");
 
-                entity.HasIndex(e => e.TransactionId, "UQ__Payment__55433A4A581F3873")
+                entity.HasIndex(e => e.OrderId, "UQ_Payment_OrderID")
                     .IsUnique();
 
                 entity.Property(e => e.PaymentId)
@@ -320,54 +322,25 @@ namespace Backend_Mobile_App.Data
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.TransactionId)
-                    .HasMaxLength(255)
-                    .IsUnicode(false)
-                    .HasColumnName("TransactionID");
-
                 entity.HasOne(d => d.Order)
-                    .WithMany(p => p.Payments)
-                    .HasForeignKey(d => d.OrderId)
+                    .WithOne(p => p.Payment)
+                    .HasForeignKey<Payment>(d => d.OrderId)
                     .HasConstraintName("FK__Payment__OrderID__5DCAEF64");
             });
 
-            modelBuilder.Entity<Product>(entity =>
+            modelBuilder.Entity<Service>(entity =>
             {
-                entity.ToTable("Product");
+                entity.ToTable("Service");
 
-                entity.Property(e => e.ProductId)
+                entity.Property(e => e.ServiceId)
                     .HasMaxLength(10)
                     .IsUnicode(false)
-                    .HasColumnName("ProductID")
-                    .IsFixedLength();
-
-                entity.Property(e => e.CategoryId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("CategoryID")
+                    .HasColumnName("ServiceID")
                     .IsFixedLength();
 
                 entity.Property(e => e.Name).HasMaxLength(255);
 
                 entity.Property(e => e.Price).HasColumnType("decimal(10, 2)");
-
-                entity.Property(e => e.SizeId)
-                    .HasMaxLength(3)
-                    .IsUnicode(false)
-                    .HasColumnName("SizeID")
-                    .IsFixedLength();
-
-                entity.HasOne(d => d.Category)
-                    .WithMany(p => p.Products)
-                    .HasForeignKey(d => d.CategoryId)
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("FK__Product__Categor__412EB0B6");
-
-                entity.HasOne(d => d.Size)
-                    .WithMany(p => p.Products)
-                    .HasForeignKey(d => d.SizeId)
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("FK__Product__SizeID__403A8C7D");
             });
 
             modelBuilder.Entity<Size>(entity =>
@@ -383,11 +356,16 @@ namespace Backend_Mobile_App.Data
                 entity.Property(e => e.Description)
                     .HasMaxLength(100)
                     .IsUnicode(false);
+
+                entity.Property(e => e.Weight).HasColumnName("weight");
             });
 
             modelBuilder.Entity<User>(entity =>
             {
-                entity.HasIndex(e => e.Email, "UQ__Users__A9D10534BB30CA55")
+                entity.HasIndex(e => e.UserLocation, "UQ_User_LocationID")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.Email, "UQ__Users__A9D1053408C052C8")
                     .IsUnique();
 
                 entity.Property(e => e.UserId)
@@ -397,10 +375,6 @@ namespace Backend_Mobile_App.Data
                     .IsFixedLength();
 
                 entity.Property(e => e.Email).HasMaxLength(255);
-
-                entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
-
-                entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
 
                 entity.Property(e => e.Password)
                     .HasMaxLength(100)
@@ -415,13 +389,19 @@ namespace Backend_Mobile_App.Data
                     .IsUnicode(false);
 
                 entity.Property(e => e.UserName).HasMaxLength(100);
+
+                entity.HasOne(d => d.UserLocationNavigation)
+                    .WithOne(p => p.User)
+                    .HasForeignKey<User>(d => d.UserLocation)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Users__UserLocat__1CBC4616");
             });
 
             modelBuilder.Entity<Vehicle>(entity =>
             {
                 entity.ToTable("Vehicle");
 
-                entity.HasIndex(e => e.LicensePlate, "UQ__Vehicle__026BC15CE9D266F3")
+                entity.HasIndex(e => e.LicensePlate, "UQ__Vehicle__026BC15C04D34E5E")
                     .IsUnique();
 
                 entity.Property(e => e.VehicleId)
@@ -433,6 +413,8 @@ namespace Backend_Mobile_App.Data
                 entity.Property(e => e.LicensePlate)
                     .HasMaxLength(20)
                     .IsUnicode(false);
+
+                entity.Property(e => e.Price).HasColumnName("price");
 
                 entity.Property(e => e.Status)
                     .HasMaxLength(50)

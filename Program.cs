@@ -1,4 +1,6 @@
 using Backend_Mobile_App.Data;
+using Backend_Mobile_App.Repositories;
+using Backend_Mobile_App.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,7 +11,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<IOrderRepository, OrderService>();
 
 builder.Services.AddCors(options =>
 {
@@ -20,12 +23,8 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
-builder.Services.AddDbContext<TrackingShipmentContext>(options =>
+builder.Services.AddDbContext<Tracking_ShipmentContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-
-
-
 
 var app = builder.Build();
 app.UseCors("AllowMobile");

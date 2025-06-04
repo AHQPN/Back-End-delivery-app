@@ -8,9 +8,9 @@ namespace Backend_Mobile_App.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly TrackingShipmentContext _context;
+        private readonly Tracking_ShipmentContext _context;
 
-        public UserRepository(TrackingShipmentContext context)
+        public UserRepository(Tracking_ShipmentContext context)
         {
             _context = context;
         }

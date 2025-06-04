@@ -15,10 +15,10 @@ namespace Backend_Mobile_App.Controllers
     public class AuthController : ControllerBase
     {
        
-        private readonly TrackingShipmentContext _context;
+        private readonly Tracking_ShipmentContext _context;
         private readonly IConfiguration _configuration;
 
-        public AuthController(TrackingShipmentContext context, IConfiguration configuration)
+        public AuthController(Tracking_ShipmentContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;

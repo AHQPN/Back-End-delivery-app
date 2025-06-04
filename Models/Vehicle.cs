@@ -10,6 +10,7 @@ namespace Backend_Mobile_App.Models
         public string LicensePlate { get; set; } = null!;
         public int? Capacity { get; set; }
         public string? Status { get; set; }
+        public double? Price { get; set; }
 
         public virtual Assignment? Assignment { get; set; }
     }
