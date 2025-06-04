@@ -30,7 +30,6 @@ namespace Backend_Mobile_App.Data
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<Vehicle> Vehicles { get; set; } = null!;
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Assignment>(entity =>
@@ -182,12 +181,6 @@ namespace Backend_Mobile_App.Data
 
             modelBuilder.Entity<Order>(entity =>
             {
-                entity.HasIndex(e => e.SourceLocation, "UQ__Orders__244780DBB9568C60")
-                    .IsUnique();
-
-                entity.HasIndex(e => e.DestinationLocation, "UQ__Orders__3FAFAC8AA95D02AB")
-                    .IsUnique();
-
                 entity.Property(e => e.OrderId)
                     .HasMaxLength(10)
                     .IsUnicode(false)
@@ -216,6 +209,8 @@ namespace Backend_Mobile_App.Data
 
                 entity.Property(e => e.OrderStatus).HasMaxLength(20);
 
+                entity.Property(e => e.PickupTime).HasColumnType("datetime");
+
                 entity.Property(e => e.Serviceid)
                     .HasMaxLength(10)
                     .IsUnicode(false)
@@ -229,8 +224,8 @@ namespace Backend_Mobile_App.Data
                     .HasConstraintName("FK__Orders__Customer__45F365D3");
 
                 entity.HasOne(d => d.DestinationLocationNavigation)
-                    .WithOne(p => p.OrderDestinationLocationNavigation)
-                    .HasForeignKey<Order>(d => d.DestinationLocation)
+                    .WithMany(p => p.OrderDestinationLocationNavigations)
+                    .HasForeignKey(d => d.DestinationLocation)
                     .HasConstraintName("FK__Orders__Destinat__19DFD96B");
 
                 entity.HasOne(d => d.Service)
@@ -239,8 +234,8 @@ namespace Backend_Mobile_App.Data
                     .HasConstraintName("FK__Orders__Servicei__01142BA1");
 
                 entity.HasOne(d => d.SourceLocationNavigation)
-                    .WithOne(p => p.OrderSourceLocationNavigation)
-                    .HasForeignKey<Order>(d => d.SourceLocation)
+                    .WithMany(p => p.OrderSourceLocationNavigations)
+                    .HasForeignKey(d => d.SourceLocation)
                     .HasConstraintName("FK__Orders__SourceLo__1BC821DD");
             });
 
