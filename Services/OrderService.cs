@@ -165,7 +165,7 @@ namespace Backend_Mobile_App.Services
             return _mapper.Map<List<OrderCreateDto>>(orders);
         }
 
-        public async Task<OrderResponseDTO> GetOrderByOrderId(string orderId)
+        public async Task<OrderResponseDTO> GetOrderByOrderIdAsync(string orderId)
         {
             if (string.IsNullOrEmpty(orderId))
             {
