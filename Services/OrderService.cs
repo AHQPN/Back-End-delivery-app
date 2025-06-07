@@ -76,7 +76,7 @@ namespace Backend_Mobile_App.Services
                 {
                     var exsistingDestinationLocation = await _context.Locations.FirstOrDefaultAsync(
                         l => l.Latitude.HasValue && l.Longitude.HasValue &&
-                        orderCreateDto.SourceLocation != null &&
+                        orderCreateDto.DestinationLocation != null &&
                         Math.Abs(l.Latitude.Value - orderCreateDto.DestinationLocation.Latitude.Value) <= 0.000001m &&
                         Math.Abs(l.Longitude.Value - orderCreateDto.DestinationLocation.Longitude.Value) <= 0.000001m);
 
@@ -159,13 +159,38 @@ namespace Backend_Mobile_App.Services
 
 
         }
+
+        public async Task<List<CategoryDTO>> GetAllCategoriesAsync()
+        {
+            var categories = await _context.Categories.ToListAsync();
+            return _mapper.Map<List<CategoryDTO>>(categories);
+        }
+
         public async Task<List<OrderCreateDto>> GetAllOders()
         {
             var orders = await _context.Orders!.ToListAsync();
             return _mapper.Map<List<OrderCreateDto>>(orders);
         }
 
-        public async Task<OrderResponseDTO> GetOrderByOrderId(string orderId)
+        public async Task<List<ServiceDTO>> GetAllServicesAsync()
+        {
+            var services = await _context.Services.ToListAsync();
+            return _mapper.Map<List<ServiceDTO>>(services);
+        }
+
+        public async Task<List<SizeDTO>> GetAllSizesAsync()
+        {
+            var sizes = await _context.Sizes.ToListAsync();
+            return _mapper.Map<List<SizeDTO>>(sizes);
+        }
+
+        public async Task<List<VehicleDTO>> GetAllVehiclesAsync()
+        {
+            var vehicles = await _context.Vehicles.ToListAsync();
+            return _mapper.Map<List<VehicleDTO>>(vehicles);
+        }
+
+        public async Task<OrderResponseDTO> GetOrderByOrderIdAsync(string orderId)
         {
             if (string.IsNullOrEmpty(orderId))
             {

@@ -24,7 +24,7 @@ namespace Backend_Mobile_App.DTOs
         public string? OrderStatus { get; set; }
         public string? PaymentStatus { get; set; }
         public DateTime? CreatedAt { get; set; }
-
+        public VehicleDTO? Vehicle { get; set; }
 
     }
 }

@@ -12,12 +12,16 @@ namespace Backend_Mobile_App.Mapping
             .ForMember(dest => dest.SourceLocation, opt => opt.MapFrom(src => src.SourceLocation))
             .ForMember(dest => dest.DestinationLocation, opt => opt.MapFrom(src => src.DestinationLocation))
             .ReverseMap()
-            .ForMember(dest => dest.SourceLocation, opt => opt.Ignore()) 
+            .ForMember(dest => dest.SourceLocation, opt => opt.Ignore())
             .ForMember(dest => dest.DestinationLocation, opt => opt.Ignore());
-
+            
             CreateMap<OrderItem, OrderItemDto>().ReverseMap();
             CreateMap<Payment, PaymentDto>().ReverseMap();
             CreateMap<Location, LocationDTO>().ReverseMap();
+            CreateMap<Category, CategoryDTO>().ReverseMap();
+            CreateMap<Service, ServiceDTO>().ReverseMap();
+            CreateMap<Size, SizeDTO>().ReverseMap();
+            CreateMap<Vehicle, VehicleDTO>().ReverseMap();
         }
     }
 }

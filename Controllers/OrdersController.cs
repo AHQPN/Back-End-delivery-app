@@ -36,7 +36,7 @@ namespace Backend_Mobile_App.Controllers
             return CreatedAtAction(nameof(GetOrder), new { controller = "Orders", id = newOrderId }, orderResponse);
         }
 
-        //Lay ra tat ca cac orders
+        //Lay ra order theo id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrder(string id)
         {
@@ -44,9 +44,64 @@ namespace Backend_Mobile_App.Controllers
             {
                 return Ok(await _orderService.GetOrderByOrderIdAsync(id)); 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
+                return BadRequest(new { message = "Không thể xử lý yêu cầu", detail = ex.Message });
+            }
+        }
+
+        //Lay tat ca cac loai hang
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            try
+            {
+                return Ok(await _orderService.GetAllCategoriesAsync());
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        //Lay tat ca cac sizes
+        [HttpGet("sizes")]
+        public async Task<IActionResult> GetAllSizes()
+        {
+            try
+            {
+                return Ok(await _orderService.GetAllSizesAsync());
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        //Lay tat ca cac loai dich vu
+        [HttpGet("services")]
+        public async Task<IActionResult> GetAllServices()
+        {
+            try
+            {
+                return Ok(await _orderService.GetAllServicesAsync());
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("vehicles")]
+        public async Task<IActionResult> GetAllVehicles()
+        {
+            try
+            {
+                return Ok(await _orderService.GetAllVehiclesAsync());
+            }
+            catch (Exception)
+            {
                 return BadRequest();
             }
         }
