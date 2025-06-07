@@ -17,63 +17,153 @@ namespace Backend_Mobile_App.Services
         {
             _context = context;
             _mapper = mapper;
-        }
+        }       
 
         public async Task<string> AddOrderAsync(OrderCreateDto orderCreateDto)
         {
-            throw new NotImplementedException();
-            if (orderCreateDto == null)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                throw new ArgumentNullException(nameof(orderCreateDto), "Dữ liệu tạo đơn hàng không được để trống.");
-            }
-
-            // Kiểm tra CustomerID tồn tại
-            if (string.IsNullOrEmpty(orderCreateDto.CustomerID) || await _context.Users.FindAsync(orderCreateDto.CustomerID) == null)
-            {
-                throw new Exception("CustomerID không hợp lệ hoặc không tồn tại.");
-            }
-
-            //Tạo mới một order
-            var newOrder = _mapper.Map<Order>(orderCreateDto);
-            string orderId = "O" + Guid.NewGuid().ToString();
-            newOrder.OrderId = orderId;
-            newOrder.CreatedAt = DateTime.Now;
-            newOrder.OrderStatus = "Đang chờ";
-
-            // Thêm OrderItems
-            if (orderCreateDto.CustomerID != null)
-            {
-                 newOrder.OrderItems = _mapper.Map<List<OrderItem>>(orderCreateDto.OrderItems);
-                foreach (var item in newOrder.OrderItems)
+                if (orderCreateDto == null)
                 {
-                    item.OrderItemId = "OI" + Guid.NewGuid().ToString();
-                    item.OrderId = orderId;
+                    throw new ArgumentNullException(nameof(orderCreateDto), "Dữ liệu tạo đơn hàng không được để trống.");
                 }
+
+                // Kiểm tra CustomerID tồn tại
+                if (string.IsNullOrEmpty(orderCreateDto.CustomerID) || await _context.Users.FindAsync(orderCreateDto.CustomerID) == null)
+                {
+                    throw new Exception("CustomerID không hợp lệ hoặc không tồn tại.");
+                }
+
+                // Kiểm tra ServiceID (nếu có)
+                if (!string.IsNullOrEmpty(orderCreateDto.serviceId) && await _context.Services.FindAsync(orderCreateDto.serviceId) == null)
+                {
+                    throw new Exception("ServiceID không hợp lệ hoặc không tồn tại.");
+                }
+
+                //Thêm vào location mới nếu chưa tồn tại
+                //Xử lý source location
+                int? sourceLocationId = null;
+                if (orderCreateDto.SourceLocation != null && orderCreateDto.SourceLocation.Latitude.HasValue && orderCreateDto.SourceLocation.Longitude.HasValue)
+                {
+                    var exsistingSourceLocation = await _context.Locations.FirstOrDefaultAsync(
+                        l => l.Latitude.HasValue && l.Longitude.HasValue &&
+                        orderCreateDto.SourceLocation != null &&
+                        Math.Abs(l.Latitude.Value - orderCreateDto.SourceLocation.Latitude.Value) <= 0.000001m &&
+                        Math.Abs(l.Longitude.Value - orderCreateDto.SourceLocation.Longitude.Value) <= 0.000001m);
+
+                    if (exsistingSourceLocation != null)
+                    {
+                        sourceLocationId = exsistingSourceLocation.LocationId;
+                    }
+                    else
+                    {
+                        var newSourceLocationDTO = new LocationDTO(
+                            Math.Round(orderCreateDto.SourceLocation.Latitude.Value, 6),
+                            Math.Round(orderCreateDto.SourceLocation.Longitude.Value, 6)
+                            );
+
+                        var newSourceLocation = _mapper.Map<Location>(newSourceLocationDTO);
+                        _context.Locations!.Add(newSourceLocation);
+                        await _context.SaveChangesAsync();
+                        sourceLocationId = newSourceLocation.LocationId;
+                    }
+                }
+
+                //Xử lý destination location
+                int? destinationLocationId = null;
+                if (orderCreateDto.DestinationLocation != null && orderCreateDto.DestinationLocation.Latitude.HasValue && orderCreateDto.DestinationLocation.Longitude.HasValue)
+                {
+                    var exsistingDestinationLocation = await _context.Locations.FirstOrDefaultAsync(
+                        l => l.Latitude.HasValue && l.Longitude.HasValue &&
+                        orderCreateDto.DestinationLocation != null &&
+                        Math.Abs(l.Latitude.Value - orderCreateDto.DestinationLocation.Latitude.Value) <= 0.000001m &&
+                        Math.Abs(l.Longitude.Value - orderCreateDto.DestinationLocation.Longitude.Value) <= 0.000001m);
+
+                    if (exsistingDestinationLocation != null)
+                    {
+                        destinationLocationId = exsistingDestinationLocation.LocationId;
+                    }
+                    else
+                    {
+                        var newDestinationLocationDTO = new LocationDTO(
+                             Math.Round(orderCreateDto.DestinationLocation.Latitude.Value, 6),
+                             Math.Round(orderCreateDto.DestinationLocation.Longitude.Value, 6)
+                            );
+
+                        var newDestinationLocation = _mapper.Map<Location>(newDestinationLocationDTO);
+                        _context.Locations!.Add(newDestinationLocation);
+                        await _context.SaveChangesAsync();
+                        sourceLocationId = newDestinationLocation.LocationId;
+                    }
+                }
+
+                //Tạo mới một order
+                var newOrder = _mapper.Map<Order>(orderCreateDto);
+                string orderId = "O" + Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+                newOrder.OrderId = orderId;
+                newOrder.CreatedAt = DateTime.Now;
+                newOrder.OrderStatus = "Đang chờ";
+                newOrder.SourceLocation = sourceLocationId;
+                newOrder.DestinationLocation = destinationLocationId;
+
+                // Thêm OrderItems
+                if (orderCreateDto.CustomerID != null)
+                {
+                    newOrder.OrderItems = _mapper.Map<List<OrderItem>>(orderCreateDto.OrderItems);
+                    foreach (var item in newOrder.OrderItems)
+                    {
+                        item.OrderItemId = "OI" + Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+                        item.OrderId = orderId;
+
+                        // Kiểm tra SizeID và CategoryID
+                        if (!string.IsNullOrEmpty(item.SizeId) && await _context.Sizes.FindAsync(item.SizeId) == null)
+                        {
+                            throw new Exception($"SizeID {item.SizeId} không tồn tại.");
+                        }
+                        if (!string.IsNullOrEmpty(item.CategoryId) && await _context.Categories.FindAsync(item.CategoryId) == null)
+                        {
+                            throw new Exception($"CategoryID {item.CategoryId} không tồn tại.");
+                        }
+                    }
+                }
+
+
+                // Thêm Payment
+                if (orderCreateDto.Payment != null)
+                {
+                    var newPaymment = _mapper.Map<Payment>(orderCreateDto.Payment);
+                    newPaymment.PaymentId = "PMT" + Guid.NewGuid().ToString().Replace("-", "").Substring(0, 7);
+                    newPaymment.OrderId = orderId;
+                    newPaymment.CreatedAt = DateTime.Now;
+
+                    var validPaymentStatuses = new[] { "Thành công", "Thất bại", "Chờ xử lý" };
+                    if (string.IsNullOrEmpty(newPaymment.PaymentStatus) || !validPaymentStatuses.Contains(newPaymment.PaymentStatus))
+                    {
+                        throw new Exception("PaymentStatus không hợp lệ.");
+                    }
+
+                    newOrder.Payment = newPaymment;
+                }
+                _context.Orders.Add(newOrder);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return orderId;
             }
-            
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
 
-            // Thêm Payment
-            //var payment = new Payment
-            //{
-            //    PaymentId = "PMT" + Guid.NewGuid().ToString(),
-            //    OrderId = order.OrderId,
-            //    PaymentMethod = orderDto.Payment.PaymentMethod,
-            //    PaymentStatus = orderDto.Payment.PaymentStatus,
-            //    TransactionId = orderDto.Payment.TransactionID,
-            //    Amount = orderDto.TotalAmount,
-            //    CreatedAt = DateTime.UtcNow
-            //};
-            //order.Payments.Add(payment);
 
-            //_context.Orders.Add(order);
-            //await _context.SaveChangesAsync();
+        }
 
-            //payment.OrderId = order.OrderId;
-            //await _context.SaveChangesAsync();
-            //_context.Orders!.Add(newOder);
-            //await _context.SaveChangesAsync();
-
-            //return newOder.OrderId;
+        public async Task<List<CategoryDTO>> GetAllCategoriesAsync()
+        {
+            var categories = await _context.Categories.ToListAsync();
+            return _mapper.Map<List<CategoryDTO>>(categories);
         }
 
         public async Task<List<OrderCreateDto>> GetAllOders()
@@ -82,9 +172,79 @@ namespace Backend_Mobile_App.Services
             return _mapper.Map<List<OrderCreateDto>>(orders);
         }
 
-        Task<List<OrderResponseDTO>> IOrderRepository.GetAllOdersByCustomerId(string customerId)
+        public async Task<List<ServiceDTO>> GetAllServicesAsync()
+        {
+            var services = await _context.Services.ToListAsync();
+            return _mapper.Map<List<ServiceDTO>>(services);
+        }
+
+        public async Task<List<SizeDTO>> GetAllSizesAsync()
+        {
+            var sizes = await _context.Sizes.ToListAsync();
+            return _mapper.Map<List<SizeDTO>>(sizes);
+        }
+
+        public async Task<List<VehicleDTO>> GetAllVehiclesAsync()
+        {
+            var vehicles = await _context.Vehicles.ToListAsync();
+            return _mapper.Map<List<VehicleDTO>>(vehicles);
+        }
+
+        public async Task<OrderResponseDTO> GetOrderByOrderIdAsync(string orderId)
+        {
+            if (string.IsNullOrEmpty(orderId))
+            {
+                throw new ArgumentNullException(nameof(orderId), "OrderID không được để trống.");
+            }
+
+            var orderDTO = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.OrderId == orderId)
+                .Select(o => new OrderResponseDTO
+                {
+                    OrderID = o.OrderId,
+                    SourceLocation = o.SourceLocation != null ? new LocationDTO
+                    (
+                        o.SourceLocationNavigation.Latitude,
+                        o.SourceLocationNavigation.Longitude
+                    ) : null,
+
+                    DestinationLocation = o.DestinationLocation != null ? new LocationDTO
+                    (
+                        o.DestinationLocationNavigation.Latitude,
+                        o.DestinationLocationNavigation.Longitude
+                    ) : null,
+
+                    VehicleType = o.DeliveryPersonId != null && o.Customer.Assignment != null && o.Customer.Assignment.Vehicle != null
+                    ? o.Customer.Assignment.Vehicle.VehicleType : null,
+
+                    TotalAmount = o.TotalAmount,
+                    OrderStatus = o.OrderStatus,
+                    PaymentStatus = o.Payment != null ? o.Payment.PaymentStatus : null,
+                    CreatedAt = o.CreatedAt
+
+                }).FirstOrDefaultAsync();
+
+            if (orderDTO == null)
+            {
+                throw new Exception($"Không tìm thấy đơn hàng với OrderID: {orderId}.");
+            }
+
+            return orderDTO;
+        }
+
+        Task<List<OrderResponseDTO>> GetAllOdersByCustomerId(string customerId)
         {
             throw new NotImplementedException();
         }
+
+        Task<List<OrderResponseDTO>> IOrderRepository.GetAllOdersByCustomerId(string customerId)
+        {
+            return GetAllOdersByCustomerId(customerId);
+        }
     }
 }
+
+
+
+

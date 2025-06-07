@@ -21,6 +21,7 @@ namespace Backend_Mobile_App.Models
         public DateTime? ActualDeliveryTime { get; set; }
         public int? DestinationLocation { get; set; }
         public int? SourceLocation { get; set; }
+        public DateTime? PickupTime { get; set; }
 
         public virtual User Customer { get; set; } = null!;
         public virtual Location? DestinationLocationNavigation { get; set; }
