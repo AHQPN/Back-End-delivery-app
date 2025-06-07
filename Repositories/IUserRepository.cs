@@ -6,10 +6,14 @@ namespace Backend_Mobile_App.Repositories
 {
     public interface IUserRepository
     {
+        Task<User> GetByEmailAsync(string email);
+        Task<User> GetByIdAsync(string id);
         Task<IEnumerable<User>> GetAllAsync();
-        Task<User?> GetByIdAsync(string id);
         Task AddAsync(User user);
         Task UpdateAsync(User user);
-        Task DeleteAsync(string id);
+        Task DeleteAsync(User user);
+        Task<int> CreateEmptyLocationAsync();
+
     }
+
 }

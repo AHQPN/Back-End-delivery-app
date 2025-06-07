@@ -3,9 +3,9 @@
     public class RegisterDTO
     {
         public string UserName { get; set; } = null!;
-        public string? Email { get; set; }
-        public string? PhoneNumber { get; set; }
+        public string Email { get; set; } = null!;
+        public string PhoneNumber { get; set; } = null!;
         public string Password { get; set; } = null!;
-        public string Role { get; set; } = "User"; // mặc định
+        public string Role { get; set; } = null!;
     }
 }
