@@ -211,10 +211,19 @@ namespace Backend_Mobile_App.Data
 
                 entity.Property(e => e.PickupTime).HasColumnType("datetime");
 
+                entity.Property(e => e.SdtnguoiNhan)
+                    .HasMaxLength(100)
+                    .HasColumnName("SDTNguoiNhan")
+                    .IsFixedLength();
+
                 entity.Property(e => e.Serviceid)
                     .HasMaxLength(10)
                     .IsUnicode(false)
                     .IsFixedLength();
+
+                entity.Property(e => e.TenNguoiNhan)
+                    .HasMaxLength(100)
+                    .HasColumnName("tenNguoiNhan");
 
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(10, 2)");
 
