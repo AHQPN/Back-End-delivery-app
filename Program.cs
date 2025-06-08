@@ -13,6 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IOrderRepository, OrderService>();
+builder.Services.AddScoped<ILocationRepository, LocationService>();
 
 builder.Services.AddCors(options =>
 {

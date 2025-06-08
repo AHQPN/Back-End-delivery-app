@@ -30,15 +30,15 @@ namespace Backend_Mobile_App.Services
                 }
 
                 // Kiểm tra CustomerID tồn tại
-                if (string.IsNullOrEmpty(orderCreateDto.CustomerID) || await _context.Users.FindAsync(orderCreateDto.CustomerID) == null)
+                if (string.IsNullOrEmpty(orderCreateDto.CustomerId) || await _context.Users.FindAsync(orderCreateDto.CustomerId) == null)
                 {
-                    throw new Exception("CustomerID không hợp lệ hoặc không tồn tại.");
+                    throw new Exception("CustomerId không hợp lệ hoặc không tồn tại.");
                 }
 
                 // Kiểm tra ServiceID (nếu có)
-                if (!string.IsNullOrEmpty(orderCreateDto.serviceId) && await _context.Services.FindAsync(orderCreateDto.serviceId) == null)
+                if (!string.IsNullOrEmpty(orderCreateDto.Serviceid) && await _context.Services.FindAsync(orderCreateDto.Serviceid) == null)
                 {
-                    throw new Exception("ServiceID không hợp lệ hoặc không tồn tại.");
+                    throw new Exception("Serviceid không hợp lệ hoặc không tồn tại.");
                 }
 
                 //Thêm vào location mới nếu chưa tồn tại
@@ -106,9 +106,18 @@ namespace Backend_Mobile_App.Services
                 newOrder.OrderStatus = "Đang chờ";
                 newOrder.SourceLocation = sourceLocationId;
                 newOrder.DestinationLocation = destinationLocationId;
+                newOrder.CustomerId = orderCreateDto.CustomerId;
+                newOrder.Serviceid = orderCreateDto.Serviceid;
+                newOrder.DeliveryPersonId = orderCreateDto.DeliveryPersonId;
+                newOrder.EstimatedDeliveryTime = orderCreateDto.EstimatedDeliveryTime;
+                newOrder.ActualDeliveryTime = orderCreateDto.ActualDeliveryTime;
+                newOrder.PickupTime = orderCreateDto.PickupTime;
+                newOrder.TenNguoiNhan = orderCreateDto.TenNguoiNhan;
+                newOrder.SdtnguoiNhan = orderCreateDto.SdtnguoiNhan;
+                newOrder.TotalAmount = orderCreateDto.TotalAmount;
 
                 // Thêm OrderItems
-                if (orderCreateDto.CustomerID != null)
+                if (orderCreateDto.CustomerId != null)
                 {
                     newOrder.OrderItems = _mapper.Map<List<OrderItem>>(orderCreateDto.OrderItems);
                     foreach (var item in newOrder.OrderItems)

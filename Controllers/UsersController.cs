@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Backend_Mobile_App.Models;
 using Backend_Mobile_App.Data;
+using Backend_Mobile_App.Repositories;
 
 namespace Backend_Mobile_App.Controllers
 {
@@ -10,10 +11,12 @@ namespace Backend_Mobile_App.Controllers
     public class UsersController : ControllerBase
     {
         private readonly Tracking_ShipmentContext _context; // Sử dụng Tracking_ShipmentContext của bạn
+        private readonly ILocationRepository locationService;
 
-        public UsersController(Tracking_ShipmentContext context) // Inject Tracking_ShipmentContext
+        public UsersController(Tracking_ShipmentContext context, ILocationRepository _locationService) // Inject Tracking_ShipmentContext
         {
             _context = context;
+            locationService = _locationService;
         }
 
         // GET: api/Users
@@ -112,6 +115,54 @@ namespace Backend_Mobile_App.Controllers
         private bool UserExists(string id)
         {
             return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
+        }
+
+        // GET: api/Users/{id}/location
+        [HttpGet("{id}/location")]
+        public async Task<ActionResult<Location>> GetUserLocation(string id)
+        {
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.Users
+                .Include(u => u.UserLocationNavigation)
+                .FirstOrDefaultAsync(u => u.UserId == id);
+
+            if (user == null || user.UserLocationNavigation == null)
+            {
+                return NotFound();
+            }
+            var location = user.UserLocationNavigation;
+            return Ok(new
+            {
+                location.LocationId,
+                location.Latitude,
+                location.Longitude
+            });
+        }
+
+        [HttpPut("{id}/location")]
+        public async Task<IActionResult> SaveOrUpdateUserLocation(string id, [FromBody] Location locationDto)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var location = await locationService.SaveLocationByLatLongAsync(locationDto.Latitude ?? 0, locationDto.Longitude ?? 0);
+
+            if (location == null)
+            {
+                return BadRequest("Could not save location.");
+            }
+
+            user.UserLocation = location.LocationId;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
