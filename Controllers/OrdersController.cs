@@ -105,5 +105,27 @@ namespace Backend_Mobile_App.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpPut("{orderId}/status")]
+        public IActionResult UpdateOrderStatus(string orderId, [FromBody] string status)
+        {
+            var allowedStatuses = new[] { "Đang chờ", "Đang giao", "Đã hoàn tất", "Đã huỷ" };
+            if (!allowedStatuses.Contains(status))
+            {
+                return BadRequest("Invalid status.");
+            }
+
+            var order = _context.Orders.FirstOrDefault(o => o.OrderId == orderId);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            order.OrderStatus = status;
+            _context.SaveChanges();
+
+            return Ok(order);
+        }
+
     }
 }
