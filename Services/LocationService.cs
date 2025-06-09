@@ -19,16 +19,13 @@ namespace Backend_Mobile_App.Services
             _mapper = mapper;
         }        
 
-        public async Task<Location?> SaveLocationByLatLongAsync(decimal latitude, decimal longitude)
-        {    
-            var location = new Location 
-                {
-                    Latitude = latitude,
-                    Longitude = longitude
-                };
-            _context.Locations.Add(location);
+        public async Task<Location?> SaveLocationByLatLongAsync(LocationDTO locationDTO)
+        {
+            var newLocation = _mapper.Map<Location>(locationDTO);
+
+            _context.Locations.Add(newLocation);
             await _context.SaveChangesAsync();
-            return location;
+            return newLocation;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Backend_Mobile_App.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly Tracking_ShipmentContext _context; // Sử dụng Tracking_ShipmentContext của bạn
+        private readonly Tracking_ShipmentContext _context;
         private readonly ILocationRepository locationService;
 
         public UsersController(Tracking_ShipmentContext context, ILocationRepository _locationService) // Inject Tracking_ShipmentContext
@@ -144,7 +144,7 @@ namespace Backend_Mobile_App.Controllers
         }
 
         [HttpPut("{id}/location")]
-        public async Task<IActionResult> SaveOrUpdateUserLocation(string id, [FromBody] Location locationDto)
+        public async Task<IActionResult> SaveOrUpdateUserLocation(string id, [FromBody] LocationDTO locationDto)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -152,7 +152,7 @@ namespace Backend_Mobile_App.Controllers
                 return NotFound();
             }
 
-            var location = await locationService.SaveLocationByLatLongAsync(locationDto.Latitude ?? 0, locationDto.Longitude ?? 0);
+            var location = await locationService.SaveLocationByLatLongAsync(locationDto);
 
             if (location == null)
             {

@@ -9,6 +9,6 @@ namespace Backend_Mobile_App.Repositories
 {
     public interface ILocationRepository
     {
-        Task<Location?> SaveLocationByLatLongAsync(decimal latitude, decimal longitude);
+        Task<Location?> SaveLocationByLatLongAsync(LocationDTO locationDTO);
     }
 }
