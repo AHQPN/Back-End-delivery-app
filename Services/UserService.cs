@@ -6,16 +6,18 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Configuration; // Add this using directive for IConfiguration
+using Microsoft.Extensions.Configuration;
+using AutoMapper; // Add this using directive for IConfiguration
 
 // This is the correct and only definition of your UserService class
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IConfiguration _configuration;
-
-    public UserService(IUserRepository userRepository, IConfiguration configuration)
+    public readonly IMapper _mapper;
+    public UserService(IUserRepository userRepository, IConfiguration configuration, IMapper mapper)
     {
+        _mapper = mapper; 
         _userRepository = userRepository;
         _configuration = configuration;
     }
@@ -140,5 +142,53 @@ public class UserService : IUserService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public async Task<(List<User> Data, int TotalPages)> GetPagedShippersAsync(int page, int pageSize)
+    {
+        var allShippers = await _userRepository.GetShippersAsync();
+        var pagedShippers = allShippers
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        return (pagedShippers, (int)Math.Ceiling((double)allShippers.Count / pageSize));
+    }
+    public async Task<(List<User> Data, int TotalPages)> GetCustomers(int page, int pageSize)
+    {
+        var allCustomer = await _userRepository.GetCustomerAsync();
+        var pageCustomer = allCustomer
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+        return (pageCustomer, (int)Math.Ceiling((double)allCustomer.Count / pageSize));
+    }
+    public async Task<UserDTO> VerifyToken(string token)
+    {
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])),
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwtSettings["Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+        try
+        {
+            var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
+            var userId = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            User user = await _userRepository.GetByIdAsync(userId);
+            UserDTO newdto = _mapper.Map<UserDTO>(user);
+            return newdto;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

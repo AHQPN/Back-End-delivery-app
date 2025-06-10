@@ -60,6 +60,23 @@ namespace Backend_Mobile_App.Repositories
             return location.LocationId;
         }
 
+        public async Task<List<User>> GetShippersAsync()
+        {
+            return await _context.Users
+                .Where(u => u.Role == "Shipper")
+                .Include(u => u.Assignment)           
+                    .ThenInclude(a => a.Vehicle)      
+                .ToListAsync();
+        }
+
+        public async Task<List<User>> GetCustomerAsync()
+        {
+            return await _context.Users
+                .Where(u => u.Role == "Customer")
+                .ToListAsync();
+        }
+
+
     }
 
 }

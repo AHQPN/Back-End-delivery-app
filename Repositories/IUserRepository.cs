@@ -13,7 +13,8 @@ namespace Backend_Mobile_App.Repositories
         Task UpdateAsync(User user);
         Task DeleteAsync(User user);
         Task<int> CreateEmptyLocationAsync();
-
+        Task<List<User>> GetShippersAsync();
+        Task<List<User>> GetCustomerAsync();
     }
 
 }

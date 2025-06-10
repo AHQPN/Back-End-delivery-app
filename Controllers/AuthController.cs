@@ -39,6 +39,27 @@ namespace Backend_Mobile_App.Controllers
 
             return Ok(result);
         }
+
+
+        [HttpPost("verify")]
+        public async Task<IActionResult> VerifyToken()
+        {
+            var authHeader = Request.Headers["Authorization"].ToString();
+
+            if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+                return Unauthorized();
+
+            var token = authHeader.Replace("Bearer ", "");
+
+            var result = await _userService.VerifyToken(token);
+
+            if (result == null)
+                return Unauthorized();
+
+            return Ok(result); 
+        }
+
+
     }
 
 }
