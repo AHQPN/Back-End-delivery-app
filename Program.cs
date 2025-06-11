@@ -15,6 +15,9 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IOrderRepository, OrderService>();
 builder.Services.AddScoped<ILocationRepository, LocationService>();
 
+builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowMobile", policy =>
