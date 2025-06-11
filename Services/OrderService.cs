@@ -94,7 +94,7 @@ namespace Backend_Mobile_App.Services
                         var newDestinationLocation = _mapper.Map<Location>(newDestinationLocationDTO);
                         _context.Locations!.Add(newDestinationLocation);
                         await _context.SaveChangesAsync();
-                        sourceLocationId = newDestinationLocation.LocationId;
+                        destinationLocationId = newDestinationLocation.LocationId;
                     }
                 }
 
@@ -106,15 +106,16 @@ namespace Backend_Mobile_App.Services
                 newOrder.OrderStatus = "Đang chờ";
                 newOrder.SourceLocation = sourceLocationId;
                 newOrder.DestinationLocation = destinationLocationId;
-                newOrder.CustomerId = orderCreateDto.CustomerId;
-                newOrder.Serviceid = orderCreateDto.Serviceid;
-                newOrder.DeliveryPersonId = orderCreateDto.DeliveryPersonId;
-                newOrder.EstimatedDeliveryTime = orderCreateDto.EstimatedDeliveryTime;
-                newOrder.ActualDeliveryTime = orderCreateDto.ActualDeliveryTime;
-                newOrder.PickupTime = orderCreateDto.PickupTime;
-                newOrder.TenNguoiNhan = orderCreateDto.TenNguoiNhan;
-                newOrder.SdtnguoiNhan = orderCreateDto.SdtnguoiNhan;
-                newOrder.TotalAmount = orderCreateDto.TotalAmount;
+
+                //newOrder.CustomerId = orderCreateDto.CustomerId;
+                //newOrder.Serviceid = orderCreateDto.Serviceid;
+                //newOrder.DeliveryPersonId = orderCreateDto.DeliveryPersonId;
+                //newOrder.EstimatedDeliveryTime = orderCreateDto.EstimatedDeliveryTime;
+                //newOrder.ActualDeliveryTime = orderCreateDto.ActualDeliveryTime;
+                //newOrder.PickupTime = orderCreateDto.PickupTime;
+                //newOrder.TenNguoiNhan = orderCreateDto.TenNguoiNhan;
+                //newOrder.SdtnguoiNhan = orderCreateDto.SdtnguoiNhan;
+                //newOrder.TotalAmount = orderCreateDto.TotalAmount;
 
                 // Thêm OrderItems
                 if (orderCreateDto.CustomerId != null)
@@ -181,6 +182,48 @@ namespace Backend_Mobile_App.Services
             return _mapper.Map<List<OrderCreateDto>>(orders);
         }
 
+        public async Task<List<OrderResponseDTO>> GetAllOdersByCustomerIdAsync(string customerId)
+        {
+            if (string.IsNullOrEmpty(customerId))
+            {
+                throw new ArgumentNullException(nameof(customerId), "customerId không được để trống.");
+            }
+
+            var ordersDTO = await _context.Orders
+               .AsNoTracking()
+               .Where(o => o.CustomerId == customerId)
+               .Select(o => new OrderResponseDTO
+               {
+                   OrderID = o.OrderId,
+                   SourceLocation = o.SourceLocation != null ? new LocationDTO
+                   (
+                       o.SourceLocationNavigation.Latitude,
+                       o.SourceLocationNavigation.Longitude
+                   ) : null,
+
+                   DestinationLocation = o.DestinationLocation != null ? new LocationDTO
+                   (
+                       o.DestinationLocationNavigation.Latitude,
+                       o.DestinationLocationNavigation.Longitude
+                   ) : null,
+
+                   VehicleId = o.VehicleId,
+
+                   TotalAmount = o.TotalAmount,
+                   OrderStatus = o.OrderStatus,
+                   PaymentStatus = o.Payment != null ? o.Payment.PaymentStatus : null,
+                   CreatedAt = o.CreatedAt
+
+               }).ToListAsync();
+
+            if (ordersDTO == null)
+            {
+                throw new Exception($"Không tìm thấy đơn hàng với CustomerId: {customerId}.");
+            }
+
+            return ordersDTO;
+        }
+
         public async Task<List<ServiceDTO>> GetAllServicesAsync()
         {
             var services = await _context.Services.ToListAsync();
@@ -224,8 +267,7 @@ namespace Backend_Mobile_App.Services
                         o.DestinationLocationNavigation.Longitude
                     ) : null,
 
-                    VehicleType = o.DeliveryPersonId != null && o.Customer.Assignment != null && o.Customer.Assignment.Vehicle != null
-                    ? o.Customer.Assignment.Vehicle.VehicleType : null,
+                    VehicleId = o.VehicleId,
 
                     TotalAmount = o.TotalAmount,
                     OrderStatus = o.OrderStatus,
@@ -240,16 +282,6 @@ namespace Backend_Mobile_App.Services
             }
 
             return orderDTO;
-        }
-
-        Task<List<OrderResponseDTO>> GetAllOdersByCustomerId(string customerId)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<List<OrderResponseDTO>> IOrderRepository.GetAllOdersByCustomerId(string customerId)
-        {
-            return GetAllOdersByCustomerId(customerId);
         }
     }
 }

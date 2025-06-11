@@ -236,6 +236,11 @@ namespace Backend_Mobile_App.Data
 
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(10, 2)");
 
+                entity.Property(e => e.VehicleId)
+                    .HasMaxLength(10)
+                    .IsUnicode(false)
+                    .IsFixedLength();
+
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.CustomerId)
@@ -255,6 +260,11 @@ namespace Backend_Mobile_App.Data
                     .WithMany(p => p.OrderSourceLocationNavigations)
                     .HasForeignKey(d => d.SourceLocation)
                     .HasConstraintName("FK__Orders__SourceLo__1BC821DD");
+
+                entity.HasOne(d => d.Vehicle)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.VehicleId)
+                    .HasConstraintName("FK__Orders__VehicleI__2739D489");
             });
 
             modelBuilder.Entity<OrderItem>(entity =>

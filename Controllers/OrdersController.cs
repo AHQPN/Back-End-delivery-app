@@ -21,7 +21,7 @@ namespace Backend_Mobile_App.Controllers
             _orderService = orderService;
         }
 
-        
+
 
         //Lưu một order mới vào DB
         [HttpPost("saveOrder")]
@@ -42,7 +42,7 @@ namespace Backend_Mobile_App.Controllers
         {
             try
             {
-                return Ok(await _orderService.GetOrderByOrderIdAsync(id)); 
+                return Ok(await _orderService.GetOrderByOrderIdAsync(id));
             }
             catch (Exception ex)
             {
@@ -99,6 +99,20 @@ namespace Backend_Mobile_App.Controllers
             try
             {
                 return Ok(await _orderService.GetAllVehiclesAsync());
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        //Lấy các đơn hàng của một user
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetOrderByUserId(String userId)
+        {
+            try
+            {
+                return Ok(await _orderService.GetAllOdersByCustomerIdAsync(userId));
             }
             catch (Exception)
             {

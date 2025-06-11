@@ -3,7 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Backend_Mobile_App.Models;
 using Backend_Mobile_App.Data;
 using Backend_Mobile_App.Repositories;
-
+using Backend_Mobile_App.Services;
+using Backend_Mobile_App.DTOs;
 namespace Backend_Mobile_App.Controllers
 {
     [Route("api/[controller]")]
@@ -12,11 +13,14 @@ namespace Backend_Mobile_App.Controllers
     {
         private readonly Tracking_ShipmentContext _context;
         private readonly ILocationRepository locationService;
+        private readonly IUserService _userService;
 
-        public UsersController(Tracking_ShipmentContext context, ILocationRepository _locationService) // Inject Tracking_ShipmentContext
+        public UsersController(Tracking_ShipmentContext context, ILocationRepository _locationService, IUserService userService)
         {
             _context = context;
             locationService = _locationService;
+            _userService = userService;
+
         }
         [HttpGet("customerslist")]
         public async Task<IActionResult> GetPagedCustomers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
@@ -30,7 +34,7 @@ namespace Backend_Mobile_App.Controllers
                     UserName = c.UserName,
                     PhoneNumber = c.PhoneNumber,
                     Email = c.Email,
-                   
+
                 }),
                 totalPages
             };
@@ -110,10 +114,6 @@ namespace Backend_Mobile_App.Controllers
             if (!result) return NotFound();
             return Ok("Xoá thành công");
         }
-        
-
-    }
-
         private bool UserExists(string id)
         {
             return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
@@ -139,7 +139,6 @@ namespace Backend_Mobile_App.Controllers
             var location = user.UserLocationNavigation;
             return Ok(new
             {
-                location.LocationId,
                 location.Latitude,
                 location.Longitude
             });
@@ -166,5 +165,8 @@ namespace Backend_Mobile_App.Controllers
 
             return NoContent();
         }
+
     }
+
+
 }

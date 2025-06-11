@@ -5,6 +5,11 @@ namespace Backend_Mobile_App.Models
 {
     public partial class Vehicle
     {
+        public Vehicle()
+        {
+            Orders = new HashSet<Order>();
+        }
+
         public string VehicleId { get; set; } = null!;
         public string VehicleType { get; set; } = null!;
         public string LicensePlate { get; set; } = null!;
@@ -13,5 +18,6 @@ namespace Backend_Mobile_App.Models
         public double? Price { get; set; }
 
         public virtual Assignment? Assignment { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
     }
 }
