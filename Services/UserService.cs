@@ -109,6 +109,20 @@ public class UserService : IUserService
         await _userRepository.UpdateAsync(user);
         return true;
     }
+    public async Task<bool> UpdateShipperAsync(string id, UserDTO model)
+    {
+        var user = await _userRepository.GetByIdAsync(id);
+        if (user == null) return false;
+
+        user.UserName = model.UserName;
+        user.Email = model.Email;
+        user.PhoneNumber = model.PhoneNumber;
+        user.Role = model.Role;
+        
+
+        await _userRepository.UpdateAsync(user);
+        return true;
+    }
 
     public async Task<bool> DeleteUserAsync(string id)
     {
@@ -127,7 +141,7 @@ public class UserService : IUserService
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserId),
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
             new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role)
@@ -144,29 +158,24 @@ public class UserService : IUserService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public async Task<(List<User> Data, int TotalPages)> GetPagedShippersAsync(int page, int pageSize)
+    public async Task<List<User>> GetPagedShippersAsync()
     {
         var allShippers = await _userRepository.GetShippersAsync();
-        var pagedShippers = allShippers
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
 
-        return (pagedShippers, (int)Math.Ceiling((double)allShippers.Count / pageSize));
+
+        return allShippers;
     }
-    public async Task<(List<User> Data, int TotalPages)> GetCustomers(int page, int pageSize)
+    public async Task<List<User>> GetCustomers()
     {
         var allCustomer = await _userRepository.GetCustomerAsync();
-        var pageCustomer = allCustomer
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-        return (pageCustomer, (int)Math.Ceiling((double)allCustomer.Count / pageSize));
+
+        return allCustomer;
     }
     public async Task<UserDTO> VerifyToken(string token)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var tokenHandler = new JwtSecurityTokenHandler();
+
         var validationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -181,14 +190,19 @@ public class UserService : IUserService
         try
         {
             var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
-            var userId = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            Console.WriteLine(principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value);
+            
+            var userId = principal.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
             User user = await _userRepository.GetByIdAsync(userId);
             UserDTO newdto = _mapper.Map<UserDTO>(user);
             return newdto;
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine("❌ Token validation failed: " + ex.Message);
             return null;
         }
+
     }
 }

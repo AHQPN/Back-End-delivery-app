@@ -15,9 +15,9 @@ namespace Backend_Mobile_App.Services
         Task<UserDTO> GetByIdAsync(string id);
         Task<bool> UpdateUserAsync(string id, RegisterDTO model);
         Task<bool> DeleteUserAsync(string id);
-
-        Task<(List<User> Data, int TotalPages)> GetPagedShippersAsync(int page, int pageSize);
-        Task<(List<User> Data, int TotalPages)> GetCustomers(int page, int pageSize);
+        Task<bool> UpdateShipperAsync(string id, UserDTO model);
+        Task<List<User>> GetPagedShippersAsync();
+        Task<List<User>> GetCustomers();
 
 
     }

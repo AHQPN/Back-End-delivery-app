@@ -45,6 +45,8 @@ namespace Backend_Mobile_App.Controllers
         public async Task<IActionResult> VerifyToken()
         {
             var authHeader = Request.Headers["Authorization"].ToString();
+            
+            Console.WriteLine("Token nhận được: " + authHeader);
 
             if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
                 return Unauthorized();
