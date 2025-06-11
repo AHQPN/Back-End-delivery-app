@@ -1,7 +1,7 @@
 using Backend_Mobile_App.Data;
 using Backend_Mobile_App.DTOs;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace Backend_Mobile_App.Repositories
 {
@@ -15,14 +15,38 @@ namespace Backend_Mobile_App.Repositories
 
         public async Task<OrderStatisticsDto> GetOrderStatisticsAsync()
         {
-            var totalOrders = _context.Orders.Count();
-            var totalRevenue = _context.Orders.Sum(o => o.TotalAmount);
+            var tongDonHang = await _context.Orders.CountAsync();
+            var tongShipper = await _context.Users.CountAsync(u => u.Role == "Shipper");
+            var tongKhach = await _context.Users.CountAsync(u => u.Role == "Customer");
+            var tongPhuongTien = await _context.Vehicles.CountAsync();
 
-            return await Task.FromResult(new OrderStatisticsDto
+            // Lấy doanh thu theo từng tháng đã có dữ liệu ActualDeliveryTime
+            var doanhThuTheoThangRaw = await _context.Orders
+                .Where(o => o.ActualDeliveryTime != null)
+                .GroupBy(o => new { o.ActualDeliveryTime.Value.Year, o.ActualDeliveryTime.Value.Month })
+                .Select(g => new
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    DoanhThu = g.Sum(x => x.TotalAmount)
+                })
+                .OrderBy(x => x.Year).ThenBy(x => x.Month)
+                .ToListAsync();
+
+            var dictDoanhThu = doanhThuTheoThangRaw
+                .ToDictionary(
+                    x => $"{x.Month:00}/{x.Year}",
+                    x => x.DoanhThu
+                );
+
+            return new OrderStatisticsDto
             {
-                TotalOrders = totalOrders,
-                TotalRevenue = totalRevenue
-            });
+                TongDonHang = tongDonHang,
+                TongShipper = tongShipper,
+                TongKhach = tongKhach,
+                TongPhuongTien = tongPhuongTien,
+                DoanhThuTheoThang = dictDoanhThu
+            };
         }
     }
 }
