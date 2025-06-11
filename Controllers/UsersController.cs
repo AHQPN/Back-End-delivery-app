@@ -18,99 +18,101 @@ namespace Backend_Mobile_App.Controllers
             _context = context;
             locationService = _locationService;
         }
+        [HttpGet("customerslist")]
+        public async Task<IActionResult> GetPagedCustomers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var (customers, totalPages) = await _userService.GetCustomers(page, pageSize);
+            var result = new
+            {
+                data = customers.Select(c => new UserDTO
+                {
+                    UserId = c.UserId,
+                    UserName = c.UserName,
+                    PhoneNumber = c.PhoneNumber,
+                    Email = c.Email,
+                   
+                }),
+                totalPages
+            };
+            return Ok(result);
+        }
 
-        // GET: api/Users
+        [HttpGet("shipperslist")]
+        public async Task<IActionResult> GetPagedShippers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var (shippers, totalPages) = await _userService.GetPagedShippersAsync(page, pageSize);
+
+            var result = new
+            {
+                data = shippers.Select(s => new ShipperDTO
+                {
+                    UserId = s.UserId,
+                    UserName = s.UserName,
+                    PhoneNumber = s.PhoneNumber,
+                    Email = s.Email,
+                    VehicleType = s.Assignment?.Vehicle?.VehicleType,
+                    VehiclePlate = s.Assignment?.Vehicle?.LicensePlate
+                }),
+                totalPages
+            };
+
+            return Ok(result);
+        }
+        [HttpPost("addshipper")]
+        public async Task<IActionResult> addShipper([FromBody] RegisterDTO model)
+        {
+            var result = await _userService.RegisterAsync(model);
+            if (!result) return BadRequest("Email tồn tại");
+            return Ok("Them thành công");
+        }
+        [HttpPut("updateshipper/{id}")]
+        public async Task<IActionResult> updateShipper(string id, [FromBody] RegisterDTO model)
+        {
+            var result = await _userService.UpdateUserAsync(id, model);
+            if (!result) return NotFound();
+            return Ok("Cập nhật thành công");
+        }
+        [HttpDelete("deleteshipper/{id}")]
+        public async Task<IActionResult> deleteShipper(string id)
+        {
+            var result = await _userService.DeleteUserAsync(id);
+            if (!result) return NotFound();
+            return Ok("Xoá thành công");
+        }
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<IActionResult> GetAll()
         {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
-            return await _context.Users.ToListAsync(); // Truy vấn tất cả người dùng
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
         }
 
-        // GET: api/Users/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(string id)
+        public async Task<IActionResult> GetById(string id)
         {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
-            var user = await _context.Users.FindAsync(id); // Tìm người dùng theo UserId
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return user;
+            var user = await _userService.GetByIdAsync(id);
+            if (user == null) return NotFound();
+            return Ok(user);
         }
 
-        // POST: api/Users
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
-        {
-            if (_context.Users == null)
-            {
-                return Problem("Entity set 'Tracking_ShipmentContext.Users' is null.");
-            }
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
-        }
-
-        // PUT: api/Users/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(string id, User user)
+        public async Task<IActionResult> Update(string id, [FromBody] RegisterDTO model)
         {
-            if (id != user.UserId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var result = await _userService.UpdateUserAsync(id, model);
+            if (!result) return NotFound();
+            return Ok("Cập nhật thành công");
         }
 
-        // DELETE: api/Users/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> Delete(string id)
         {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var result = await _userService.DeleteUserAsync(id);
+            if (!result) return NotFound();
+            return Ok("Xoá thành công");
         }
+        
+
+    }
 
         private bool UserExists(string id)
         {

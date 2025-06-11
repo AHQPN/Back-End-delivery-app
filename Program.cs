@@ -26,6 +26,8 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddDbContext<Tracking_ShipmentContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 app.UseCors("AllowMobile");
