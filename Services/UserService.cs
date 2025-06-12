@@ -21,7 +21,22 @@ public class UserService : IUserService
         _userRepository = userRepository;
         _configuration = configuration;
     }
-
+    public async Task<bool> ChangePasswordAsync(string userId, string newPassword)
+    {
+        try
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) return false;
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            await _userRepository.UpdateAsync(user);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error changing password: " + ex.Message);
+            return false;
+        }
+    }
     public async Task<bool> RegisterAsync(RegisterDTO model)
     {
         var existingUser = await _userRepository.GetByEmailAsync(model.Email);
@@ -204,5 +219,27 @@ public class UserService : IUserService
             return null;
         }
 
+    }
+    public async Task<bool> AddShipper(RegisterDTO model)
+    {
+        var existingUser = await _userRepository.GetByEmailAsync(model.Email);
+        if (existingUser != null)
+            return false;
+
+        int locationId = await _userRepository.CreateEmptyLocationAsync();
+
+        var newUser = new User
+        {
+            UserId = Guid.NewGuid().ToString("N").Substring(0, 10),
+            UserName = model.UserName,
+            Email = model.Email,
+            PhoneNumber = model.PhoneNumber,
+            Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
+            Role = model.Role,
+            UserLocation = locationId
+        };
+
+        await _userRepository.AddAsync(newUser);
+        return true;
     }
 }

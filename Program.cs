@@ -1,4 +1,5 @@
 using Backend_Mobile_App.Data;
+using Backend_Mobile_App.Models;
 using Backend_Mobile_App.Repositories;
 using Backend_Mobile_App.Services;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,10 @@ builder.Services.AddDbContext<Tracking_ShipmentContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<VehicleService>();
+
+
 
 var app = builder.Build();
 app.UseCors("AllowMobile");

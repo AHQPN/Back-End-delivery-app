@@ -75,8 +75,7 @@ namespace Backend_Mobile_App.Repositories
                 .Where(u => u.Role == "Customer")
                 .ToListAsync();
         }
-
-
+        
     }
 
 }

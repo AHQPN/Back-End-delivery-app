@@ -9,6 +9,8 @@ namespace Backend_Mobile_App.Services
     {
         Task<LoginResultDTO> LoginAsync(LoginDTO model);
         Task<bool> RegisterAsync(RegisterDTO model);
+        Task<bool> ChangePasswordAsync(string userId, string newPassword);
+        
 
         Task<UserDTO> VerifyToken(string token);
         Task<IEnumerable<UserDTO>> GetAllUsersAsync();
