@@ -2,20 +2,25 @@
 using Microsoft.EntityFrameworkCore;
 using Backend_Mobile_App.Models;
 using Backend_Mobile_App.Data;
-using Backend_Mobile_App.DTOs;
+using Backend_Mobile_App.Repositories;
 using Backend_Mobile_App.Services;
-
+using Backend_Mobile_App.DTOs;
 namespace Backend_Mobile_App.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private readonly Tracking_ShipmentContext _context;
+        private readonly ILocationRepository locationService;
         private readonly IUserService _userService;
 
-        public UsersController(IUserService userService)
+        public UsersController(Tracking_ShipmentContext context, ILocationRepository _locationService, IUserService userService)
         {
+            _context = context;
+            locationService = _locationService;
             _userService = userService;
+
         }
         [HttpGet("customerslist")]
         public async Task<IActionResult> GetPagedCustomers()
@@ -98,5 +103,59 @@ namespace Backend_Mobile_App.Controllers
 
 
     }
+        private bool UserExists(string id)
+        {
+            return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
+        }
+
+        // GET: api/Users/{id}/location
+        [HttpGet("{id}/location")]
+        public async Task<ActionResult<Location>> GetUserLocation(string id)
+        {
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.Users
+                .Include(u => u.UserLocationNavigation)
+                .FirstOrDefaultAsync(u => u.UserId == id);
+
+            if (user == null || user.UserLocationNavigation == null)
+            {
+                return NotFound();
+            }
+            var location = user.UserLocationNavigation;
+            return Ok(new
+            {
+                location.Latitude,
+                location.Longitude
+            });
+        }
+
+        [HttpPut("{id}/location")]
+        public async Task<IActionResult> SaveOrUpdateUserLocation(string id, [FromBody] LocationDTO locationDto)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var location = await locationService.SaveLocationByLatLongAsync(locationDto);
+
+            if (location == null)
+            {
+                return BadRequest("Could not save location.");
+            }
+
+            user.UserLocation = location.LocationId;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+    }
+
 
 }

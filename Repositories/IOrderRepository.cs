@@ -8,10 +8,12 @@ namespace Backend_Mobile_App.Repositories
         public Task<string> AddOrderAsync(OrderCreateDto orderCreateDto);
         public Task<List<OrderCreateDto>> GetAllOders();
         public Task<OrderResponseDTO> GetOrderByOrderIdAsync(string orderId);
-        public Task<List<OrderResponseDTO>> GetAllOdersByCustomerId(string customerId);
+        public Task<List<OrderResponseDTO>> GetAllOdersByCustomerIdAsync(string customerId);
+        public Task<List<OrderResponseDTO>> GetAllOdersByShipperIdAsync(string shipperId);
         public Task<List<CategoryDTO>> GetAllCategoriesAsync();
         public Task<List<ServiceDTO>> GetAllServicesAsync();
         public Task<List<SizeDTO>> GetAllSizesAsync();
         public Task<List<VehicleDTO>> GetAllVehiclesAsync();
+
     }
 }

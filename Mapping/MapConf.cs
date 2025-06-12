@@ -21,6 +21,7 @@ namespace Backend_Mobile_App.Mapping
             CreateMap<Category, CategoryDTO>().ReverseMap();
             CreateMap<Service, ServiceDTO>().ReverseMap();
             CreateMap<Size, SizeDTO>().ReverseMap();
+            CreateMap<Size, SizeDTO>().ReverseMap();
             CreateMap<Vehicle, VehicleDTO>().ReverseMap();
 
             CreateMap<User, UserDTO>()
@@ -29,6 +30,9 @@ namespace Backend_Mobile_App.Mapping
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ReverseMap();
+            CreateMap<Order, OrderResponseDTO>()
+                .ForMember(dest => dest.SourceLocation, opt => opt.MapFrom(src => src.SourceLocationNavigation))
+                .ForMember(dest => dest.DestinationLocation, opt => opt.MapFrom(src => src.DestinationLocationNavigation));
         }
     }
 }

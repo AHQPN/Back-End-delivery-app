@@ -14,6 +14,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IOrderRepository, OrderService>();
+builder.Services.AddScoped<ILocationRepository, LocationService>();
+
+builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+
+builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 
 builder.Services.AddCors(options =>
 {
