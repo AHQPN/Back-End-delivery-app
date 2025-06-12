@@ -118,7 +118,16 @@ namespace Backend_Mobile_App.Repositories
 
         private double GetDistance(double latitude1, double longitude1, double latitude2, double longitude2)
         {
-            throw new NotImplementedException();
+            const double R = 6371; // Earth radius in kilometers
+    var lat = (latitude2 - latitude1) * Math.PI / 180.0;
+    var lon = (longitude2 - longitude1) * Math.PI / 180.0;
+
+    var a = Math.Sin(lat / 2) * Math.Sin(lat / 2) +
+            Math.Cos(latitude1 * Math.PI / 180.0) * Math.Cos(latitude2 * Math.PI / 180.0) *
+            Math.Sin(lon / 2) * Math.Sin(lon / 2);
+
+    var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+    return R * c; // Distance in kilometers
         }
     }
 }
