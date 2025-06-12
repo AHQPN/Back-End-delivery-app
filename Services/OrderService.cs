@@ -208,7 +208,7 @@ namespace Backend_Mobile_App.Services
                        o.DestinationLocationNavigation.Longitude
                    ) : null,
 
-                   VehicleId = o.VehicleId,
+                   VehicleType = o.Vehicle.VehicleType,
                    TotalAmount = o.TotalAmount,
                    OrderStatus = o.OrderStatus,
                    PaymentStatus = o.Payment != null ? o.Payment.PaymentStatus : null,
@@ -254,7 +254,7 @@ namespace Backend_Mobile_App.Services
                        o.DestinationLocationNavigation.Longitude
                    ) : null,
 
-                   VehicleId = o.VehicleId,
+                   VehicleType = o.Vehicle.VehicleType,
                    TotalAmount = o.TotalAmount,
                    OrderStatus = o.OrderStatus,
                    PaymentStatus = o.Payment != null ? o.Payment.PaymentStatus : null,

@@ -7,7 +7,7 @@ namespace Backend_Mobile_App.DTOs
         public string? OrderID { get; set; }
         public LocationDTO? SourceLocation { get; set; }
         public LocationDTO? DestinationLocation { get; set; }
-        public string? VehicleId { get; set; }
+        public string? VehicleType { get; set; }
         public decimal TotalAmount { get; set; }
         public string? OrderStatus { get; set; }
         public string? PaymentStatus { get; set; }

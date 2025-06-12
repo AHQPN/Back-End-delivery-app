@@ -102,7 +102,7 @@ namespace Backend_Mobile_App.Controllers
         
 
 
-    }
+    
         private bool UserExists(string id)
         {
             return (_context.Users?.Any(e => e.UserId == id)).GetValueOrDefault();
