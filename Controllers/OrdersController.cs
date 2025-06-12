@@ -21,8 +21,6 @@ namespace Backend_Mobile_App.Controllers
             _orderService = orderService;
         }
 
-
-
         //Lưu một order mới vào DB
         [HttpPost("saveOrder")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto orderDto)
@@ -118,6 +116,41 @@ namespace Backend_Mobile_App.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        //Lấy các đơn hàng của một user
+        [HttpGet("shipper/{userId}")]
+        public async Task<IActionResult> GetOrderByShipperId(String userId)
+        {
+            try
+            {
+                return Ok(await _orderService.GetAllOdersByShipperIdAsync(userId));
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPut("{orderId}/status")]
+        public IActionResult UpdateOrderStatus(string orderId, [FromBody] string status)
+        {
+            var allowedStatuses = new[] { "Đang chờ", "Đang giao", "Đã hoàn tất", "Đã huỷ" };
+            if (!allowedStatuses.Contains(status))
+            {
+                return BadRequest("Invalid status.");
+            }
+
+            var order = _context.Orders.FirstOrDefault(o => o.OrderId == orderId);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            order.OrderStatus = status;
+            _context.SaveChanges();
+
+            return Ok(order);
         }
     }
 }
