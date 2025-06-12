@@ -17,5 +17,6 @@ namespace Backend_Mobile_App.Controllers
         public string? SdtnguoiNhan { get; set; }
         public List<OrderItemDto> OrderItems { get; set; }
         public PaymentDto? Payment { get; set; }
+        public string? VehicleId { get; set; }
     }
 }

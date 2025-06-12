@@ -30,6 +30,14 @@ namespace Backend_Mobile_App.Data
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<Vehicle> Vehicles { get; set; } = null!;
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("Server=localhost;Database=Tracking_Shipment;User Id=sa;Password=P@ssw0rd;");
+            }
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Assignment>(entity =>
@@ -144,9 +152,9 @@ namespace Backend_Mobile_App.Data
 
                 entity.Property(e => e.LocationId).HasColumnName("LocationID");
 
-                entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
+                entity.Property(e => e.Latitude).HasColumnType("decimal(11, 8)");
 
-                entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
+                entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
             });
 
             modelBuilder.Entity<Notification>(entity =>
@@ -227,6 +235,11 @@ namespace Backend_Mobile_App.Data
 
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(10, 2)");
 
+                entity.Property(e => e.VehicleId)
+                    .HasMaxLength(10)
+                    .IsUnicode(false)
+                    .IsFixedLength();
+
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.CustomerId)
@@ -246,6 +259,11 @@ namespace Backend_Mobile_App.Data
                     .WithMany(p => p.OrderSourceLocationNavigations)
                     .HasForeignKey(d => d.SourceLocation)
                     .HasConstraintName("FK__Orders__SourceLo__1BC821DD");
+
+                entity.HasOne(d => d.Vehicle)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.VehicleId)
+                    .HasConstraintName("FK__Orders__VehicleI__2739D489");
             });
 
             modelBuilder.Entity<OrderItem>(entity =>
